@@ -26,7 +26,14 @@
   },
   "homepage": "https://github.com/KoolTheba/todos-goals-api-localstorage#readme",
   "devDependencies": {
+    "husky": "^4.3.0",
     "jest": "^26.4.2",
     "standard": "^14.3.4"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint",
+      "pre-push": "npm run test"
+    }
   }
 }
