@@ -7,6 +7,13 @@
     "test": "jest  --verbose ./**/*.test.js",
     "test:coverage": "jest --verbose ./**/*.test.js --coverage",
     "test:watch": "jest --verbose ./**/*.test.js --watchAll",
+    "lint": "standard",
+    "lint:fix": "standard --fix"
+  },
+  "standard": {
+    "env": [
+      "jest"
+    ]
   },
   "repository": {
     "type": "git",
@@ -19,6 +26,7 @@
   },
   "homepage": "https://github.com/KoolTheba/todos-goals-api-localstorage#readme",
   "devDependencies": {
-    "jest": "^26.4.2"
+    "jest": "^26.4.2",
+    "standard": "^14.3.4"
   }
 }
