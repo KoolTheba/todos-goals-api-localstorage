@@ -1,0 +1,24 @@
+{
+  "name": "todos-goals-api-localstorage",
+  "version": "1.0.0",
+  "description": "A simple api for your todos/goals application",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest  --verbose ./**/*.test.js",
+    "test:coverage": "jest --verbose ./**/*.test.js --coverage",
+    "test:watch": "jest --verbose ./**/*.test.js --watchAll",
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KoolTheba/todos-goals-api-localstorage.git"
+  },
+  "author": "KoolTheba",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/KoolTheba/todos-goals-api-localstorage/issues"
+  },
+  "homepage": "https://github.com/KoolTheba/todos-goals-api-localstorage#readme",
+  "devDependencies": {
+    "jest": "^26.4.2"
+  }
+}
