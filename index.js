@@ -2,97 +2,65 @@ const { v4: uuidv4 } = require('uuid')
 
 const API = {}
 
-API.fetchGoals = () => {
-  return new Promise((resolve, reject) => {
-    const goals = Object.keys(localStorage)
-      .filter(key => localStorage[key].type === 'goal')
-      .map(key => {
-        return {
-          id: key,
-          name: localStorage[key].name
-        }
-      })
-    resolve(goals)
-  })
+const fetchAllItemsbyType = (type) => {
+  return Promise.resolve(Object.keys(localStorage)
+    .filter(key => JSON.parse(localStorage[key]).type === type)
+    .map(key => {
+      const { type, ...data } = JSON.parse(localStorage[key])
+      return {
+        id: key,
+        ...data
+      }
+    }))
 }
 
-API.fetchTodos = () => {
+const saveItemByType = (type) => (name) => {
   return new Promise((resolve, reject) => {
-    const todos = Object.keys(localStorage)
-      .filter(key => localStorage[key].type === 'todo')
-      .map(key => {
-        return {
-          id: key,
-          name: localStorage[key].name,
-          completed: localStorage[key].completed
-        }
-      })
-    resolve(todos)
-  })
-}
+    if (!name) reject(`Error saving a ${type}. Name not defined.`)
 
-API.saveGoal = (name) => {
-  return new Promise((resolve, reject) => {
-    if (!name) reject('Error saving goal. Name not defined.')
-
-    const goal = {
-      type: 'goal',
+    const item = {
+      type,
       name
     }
 
+    if (type === 'todo') item.completed = false
+
     const id = uuidv4()
-    localStorage.setItem(id, goal)
-    resolve({ name: goal.name, id })
+    localStorage.setItem(id, JSON.stringify(item))
+    const { type: storedType, ...data } = item
+
+    resolve({ ...data, id })
   })
 }
 
-API.saveTodo = (name) => {
+const deleteItemByType = (type) => (id) => {
   return new Promise((resolve, reject) => {
-    if (!name) reject('Error saving a todo. Name incorrect.')
+    if (!id) return reject(`Error deleting a ${type}. Id is not defined.`)
 
-    const todo = {
-      type: 'todo',
-      name,
-      completed: false
-    }
-    const id = uuidv4()
-    localStorage.setItem(id, todo)
-    resolve({ name: todo.name, completed: todo.completed, id })
-  })
-}
-
-API.deleteGoal = (id) => {
-  return new Promise((resolve, reject) => {
-    if (!id) return reject('Error deleting a goal. Id is not defined.')
-
-    const goal = localStorage.getItem(id)
-    if (!goal) return reject('The goal does not exist')
+    const item = localStorage.getItem(id)
+    if (!item) return reject(`The ${type} does not exist`)
 
     localStorage.removeItem(id)
-    resolve({ id, name: goal.name })
+
+    const { type: storedType, ...data } = JSON.parse(item)
+    resolve({ ...data, id })
   })
 }
 
-API.deleteTodo = (id) => {
-  return new Promise((resolve, reject) => {
-    if (!id) return reject('Error deleting a todo. Id incorrect.')
-
-    const todo = localStorage.getItem(id)
-    if (!todo) return reject('Todo item does not exist')
-
-    localStorage.removeItem(id)
-    resolve({ id, name: todo.name, completed: todo.completed })
-  })
-}
-
+API.fetchGoals = () => fetchAllItemsbyType('goal')
+API.fetchTodos = () => fetchAllItemsbyType('todo')
+API.saveTodo = saveItemByType('todo')
+API.saveGoal = saveItemByType('goal')
+API.deleteTodo = deleteItemByType('todo')
+API.deleteGoal = deleteItemByType('goal')
 API.saveTodoToggle = (id) => {
   return new Promise((resolve, reject) => {
     if (!id) return reject('Error toggling a todo. Id incorrect.')
 
-    const todo = localStorage.getItem(id)
+    const todo = JSON.parse(localStorage.getItem(id))
     if (!todo) return reject('Todo item does not exist')
 
-    localStorage.setItem(id, { completed: !todo.completed })
+    localStorage.setItem(id, JSON.stringify({ ...todo, completed: !todo.completed }))
     resolve({ id, name: todo.name, completed: !todo.completed })
   })
 }
