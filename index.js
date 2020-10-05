@@ -1,112 +1,68 @@
-(function () {
-  window.API = {}
+const { v4: uuidv4 } = require('uuid')
 
-  function fail () {
-    return Math.floor(Math.random()*(5-1)) === 3
-  }
+const API = {}
 
-  function generateId () {
-    return Math.random().toString(36).substring(2);
-  }
+const fetchAllItemsbyType = (type) => {
+  return Promise.resolve(Object.keys(localStorage)
+    .filter(key => JSON.parse(localStorage[key]).type === type)
+    .map(key => {
+      const { type, ...data } = JSON.parse(localStorage[key])
+      return {
+        id: key,
+        ...data
+      }
+    }))
+}
 
-  var goals = [
-    {
-      id: generateId(),
-      name: 'Learn Redux',
-    },
-    {
-      id: generateId(),
-      name: 'Read 50 books this year',
-    },
-  ];
-  var todos = [
-    {
-      id: generateId(),
-      name: 'Walk the dog',
-      complete: false,
-    },
-    {
-      id: generateId(),
-      name: 'Wash the car',
-      complete: false,
-    },
-    {
-      id: generateId(),
-      name: 'Go to the gym',
-      complete: true,
+const saveItemByType = (type) => (name) => {
+  return new Promise((resolve, reject) => {
+    if (!name) reject(`Error saving a ${type}. Name not defined.`)
+
+    const item = {
+      type,
+      name
     }
-  ];
 
-  API.fetchGoals = function () {
-    return new Promise((res, rej) => {
-      setTimeout(function () {
-        res(goals)
-      }, 2000)
-    })
-  }
+    if (type === 'todo') item.completed = false
 
-  API.fetchTodos = function () {
-    return new Promise((res, rej) => {
-      setTimeout(function () {
-        res(todos)
-      }, 2000)
-    })
-  }
+    const id = uuidv4()
+    localStorage.setItem(id, JSON.stringify(item))
+    const { type: storedType, ...data } = item
 
-  API.saveTodo = function (name) {
-    return new Promise((res, rej) => {
-      setTimeout(() => {
-        const todo = {
-          id: generateId(),
-          name: name,
-          complete: false,
-        }
-        todos = todos.concat([todo]);
-        fail() ? rej(todo) : res(todo);
-      }, 300)
-    })
-  }
+    resolve({ ...data, id })
+  })
+}
 
-  API.saveGoal = function (name) {
-    return new Promise((res, rej) => {
-      setTimeout(() => {
-        const goal = {
-          id: generateId(),
-          name: name,
-        }
-        goals = goals.concat([goal]);
-        fail() ? rej(goal) : res(goal);
-      }, 300)
-    })
-  }
+const deleteItemByType = (type) => (id) => {
+  return new Promise((resolve, reject) => {
+    if (!id) return reject(`Error deleting a ${type}. Id is not defined.`)
 
-  API.deleteGoal = function (id) {
-    return new Promise((res, rej) => {
-      setTimeout(() => {
-        goals = goals.filter((goal) => goal.id !== id);
-        fail() ? rej(): res(goals);
-      }, 300)
-    });
-  }
+    const item = localStorage.getItem(id)
+    if (!item) return reject(`The ${type} does not exist`)
 
-  API.deleteTodo = function (id) {
-    return new Promise((res, rej) => {
-      setTimeout(() => {
-        todos = todos.filter((todo) => todo.id !== id);
-        fail() ? rej(): res(todos);
-      }, 300)
-    });
-  }
+    localStorage.removeItem(id)
 
-  API.saveTodoToggle = function (id) {
-    return new Promise((res, rej) => {
-      setTimeout(() => {
-        todos = todos.map((todo) => todo.id !== id ? todo :
-          Object.assign({}, todo, {complete: !todo.complete})
-        );
+    const { type: storedType, ...data } = JSON.parse(item)
+    resolve({ ...data, id })
+  })
+}
 
-        fail() ? rej(): res(todos);
-      }, 300)
-    });
-  }
-})()
+API.fetchGoals = () => fetchAllItemsbyType('goal')
+API.fetchTodos = () => fetchAllItemsbyType('todo')
+API.saveTodo = saveItemByType('todo')
+API.saveGoal = saveItemByType('goal')
+API.deleteTodo = deleteItemByType('todo')
+API.deleteGoal = deleteItemByType('goal')
+API.saveTodoToggle = (id) => {
+  return new Promise((resolve, reject) => {
+    if (!id) return reject('Error toggling a todo. Id incorrect.')
+
+    const todo = JSON.parse(localStorage.getItem(id))
+    if (!todo) return reject('Todo item does not exist')
+
+    localStorage.setItem(id, JSON.stringify({ ...todo, completed: !todo.completed }))
+    resolve({ id, name: todo.name, completed: !todo.completed })
+  })
+}
+
+module.exports = API
