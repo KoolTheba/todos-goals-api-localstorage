@@ -35,11 +35,11 @@ describe('API todos', () => {
 
   const populateTodos = () => {
     todosList.forEach(todo => {
-      localStorage.__STORE__[todo.id] = {
+      localStorage.__STORE__[todo.id] = JSON.stringify({
         type: 'todo',
         name: todo.name,
         completed: todo.completed
-      }
+      })
     })
   }
 
@@ -70,7 +70,7 @@ describe('API todos', () => {
 
   test('should throw an error saving a todo if data is missing', () => {
     const id = null
-    return expect(API.saveTodo(id)).rejects.toMatch('Error saving a todo. Name incorrect.')
+    return expect(API.saveTodo(id)).rejects.toMatch('Error saving a todo. Name not defined.')
   })
 
   test('should delete an specific todo correctly', async () => {
@@ -83,12 +83,12 @@ describe('API todos', () => {
 
   test('should throw an error deleting a todo with an incorrect id', () => {
     const id = null
-    return expect(API.deleteTodo(id)).rejects.toMatch('Error deleting a todo. Id incorrect.')
+    return expect(API.deleteTodo(id)).rejects.toMatch('Error deleting a todo. Id is not defined.')
   })
 
   test('should throw an error deleting a todo that not exists', () => {
     const id = fixtures.uselessId
-    return expect(API.deleteTodo(id)).rejects.toMatch('Todo item does not exist')
+    return expect(API.deleteTodo(id)).rejects.toMatch('The todo does not exist')
   })
 
   test('should toggle todo correctly to true', async () => {
@@ -127,10 +127,10 @@ describe('API goals', () => {
 
   const populateGoals = () => {
     goalsList.forEach(goal => {
-      localStorage.__STORE__[goal.id] = {
+      localStorage.__STORE__[goal.id] = JSON.stringify({
         type: 'goal',
         name: goal.name
-      }
+      })
     })
   }
 
@@ -160,7 +160,7 @@ describe('API goals', () => {
 
   test('should throw an error saving a goal if data is missing', () => {
     const id = null
-    return expect(API.saveGoal(id)).rejects.toMatch('Error saving goal. Name not defined.')
+    return expect(API.saveGoal(id)).rejects.toMatch('Error saving a goal. Name not defined.')
   })
 
   test('should delete an specific goal correctly', async () => {
